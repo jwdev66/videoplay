@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <script>
+    (function init() {
+      let uploads = []
+      let uploadIndex = 0
+      let addressEl, videoEl
+
+      document.addEventListener("DOMContentLoaded", (event) => {
+        console.log('DOM is ready.')
+        loadUploadList()
+          .then(() => {setUploadIndex()})
+        addressEl = document.getElementById('address')
+        videoEl = document.getElementById('video')
+        document.querySelector('.js-button-left').addEventListener('click', decrementUpload)
+        document.querySelector('.js-button-right').addEventListener('click', incrementUpload)
+      });
+  
+      async function loadUploadList() {
+        const response = await fetch('/api/upload_list')
+        const json = await response.json()
+        uploads = json
+      }
+
+      function setUploadIndex(index = 0) {
+        uploadIndex = index % uploads.length
+        updateUploadElements()
+      }
+
+      function updateUploadElements() {
+        if (uploads.length === 0) {
+          return
+        }
+
+        const upload = uploads[uploadIndex]
+        videoEl.src = `/videos/${upload.video_file}`
+        videoEl.load()
+        addressEl.textContent = upload.address
+      }
+
+      function incrementUpload() {
+        setUploadIndex(uploadIndex + 1)
+      }
+
+      function decrementUpload() {
+        setUploadIndex(uploadIndex - 1)
+      }
+    })()
+  </script>
+</head>
+<body>
+  <div class="centered-container">
+    <button type="button" class="js-button-left">&lt;</button>
+    <button type="button" class="js-button-right">&gt;</button>
+    <h2 id='address'>Address</h2>
+    <video id='video' controls style="max-height:80vh;max-width:100vw"></video>
+  </div>
+  <a href="/upload">Upload New Video</a>
+
+</body>
+</html>
